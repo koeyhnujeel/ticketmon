@@ -1,4 +1,4 @@
-package com.zunza.ticketmon.domain.performance;
+package com.zunza.ticketmon.domain.performance.entity;
 
 public enum Category {
 	MUSICAL,
