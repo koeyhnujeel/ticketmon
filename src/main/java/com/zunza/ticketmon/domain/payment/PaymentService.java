@@ -42,7 +42,7 @@ public class PaymentService {
 
 	public PaymentCheckoutResponseDto getCheckoutInfo(Long userId) {
 		List<Long> performanceSeatIds = performanceSeatUtil.getSelectedSeats(userId);
-		List<PerformanceSeat> performanceSeats = performanceSeatRepository.findAllById(performanceSeatIds);
+		List<PerformanceSeat> performanceSeats = performanceSeatRepository.findByIdsWithSeatAndPrice(performanceSeatIds);
 		if (performanceSeats.isEmpty()) {
 			throw new PerformanceSeatNotFoundException();
 		}
