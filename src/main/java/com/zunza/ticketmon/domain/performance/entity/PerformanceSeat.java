@@ -1,6 +1,7 @@
 package com.zunza.ticketmon.domain.performance.entity;
 
 import com.zunza.ticketmon.domain.schedule.Schedule;
+import com.zunza.ticketmon.domain.ticket.Ticket;
 import com.zunza.ticketmon.domain.venue.entity.Seat;
 import com.zunza.ticketmon.global.entity.BaseEntity;
 
@@ -36,6 +37,10 @@ public class PerformanceSeat extends BaseEntity {
 	@JoinColumn(name = "schedule_id")
 	private Schedule schedule;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ticket_id")
+	private Ticket ticket;
+
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private ReservationStatus reservationStatus = ReservationStatus.AVAILABLE;
@@ -45,5 +50,13 @@ public class PerformanceSeat extends BaseEntity {
 		this.seat = seat;
 		this.performancePrice = performancePrice;
 		this.schedule = schedule;
+	}
+
+	public void seatReservation() {
+		this.reservationStatus = ReservationStatus.RESERVED;
+	}
+
+	public void updateTicket(Ticket ticket) {
+		this.ticket = ticket;
 	}
 }

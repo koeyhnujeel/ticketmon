@@ -1,10 +1,10 @@
 package com.zunza.ticketmon.domain.performance.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.zunza.ticketmon.domain.schedule.Schedule;
 import com.zunza.ticketmon.domain.venue.entity.Venue;
 import com.zunza.ticketmon.global.entity.BaseEntity;
 
@@ -46,6 +46,9 @@ public class Performance extends BaseEntity {
 
 	@OneToMany(mappedBy = "performance")
 	private List<PerformancePrice> performancePrices = new ArrayList<>();
+
+	@OneToMany(mappedBy = "performance")
+	private List<Schedule> schedule = new ArrayList<>();
 
 	@Builder
 	private Performance(String title, String description, Venue venue, Category category, LocalDate startDate,
