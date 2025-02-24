@@ -1,5 +1,6 @@
 package com.zunza.ticketmon.domain.ticket;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,10 +13,9 @@ import com.zunza.ticketmon.domain.performance.exception.PerformanceSeatNotFoundE
 import com.zunza.ticketmon.domain.performance.repository.PerformanceSeatRepository;
 import com.zunza.ticketmon.domain.ticket.dto.PerformanceSeatResponseDto;
 import com.zunza.ticketmon.domain.ticket.dto.PerformanceSeatSummaryResponseDto;
-import com.zunza.ticketmon.domain.ticket.dto.SelectSeatRequestDto;
+import com.zunza.ticketmon.domain.ticket.dto.SelectSeatsRequestDto;
 import com.zunza.ticketmon.domain.ticket.dto.SelectSeatResponseDto;
-import com.zunza.ticketmon.domain.ticket.exception.InvalidUserInfoException;
-import com.zunza.ticketmon.domain.ticket.exception.SeatReservationInProgressException;
+import com.zunza.ticketmon.domain.ticket.dto.SelectedSeatDto;
 import com.zunza.ticketmon.global.common.RedisKeyPrefix;
 import com.zunza.ticketmon.util.PerformanceSeatUtil;
 
@@ -34,7 +34,7 @@ public class TicketService {
 		List<PerformanceSeat> seats = performanceSeatRepository.findByScheduleId(scheduleId);
 
 		for (PerformanceSeat seat : seats) {
-			String key = RedisKeyPrefix.TEMPLOCKED.getPrefix() + seat.getId();
+			String key = RedisKeyPrefix.TEMP_LOCKED.getPrefix() + seat.getId();
 			Object lock = redisTemplate.opsForValue().get(key);
 
 			ReservationStatus reservationStatus = lock == null ? seat.getReservationStatus() : ReservationStatus.RESERVED;
@@ -43,32 +43,41 @@ public class TicketService {
 		return dtoList;
 	}
 
-	public SelectSeatResponseDto selectSeat(Long userId, SelectSeatRequestDto selectSeatRequestDto) {
-		PerformanceSeat performanceSeat = performanceSeatRepository.findById(selectSeatRequestDto.getPerformanceSeatId())
-			.orElseThrow(PerformanceSeatNotFoundException::new);
+	public SelectSeatResponseDto selectSeat(Long userId, SelectSeatsRequestDto selectSeatsRequestDto) {
+		List<Long> requestSeatIds = selectSeatsRequestDto.getPerformanceSeatIds();
+		List<PerformanceSeat> performanceSeats = performanceSeatRepository.findAllById(requestSeatIds);
 
-		Boolean result = performanceSeatUtil.tryLockSeat(userId, selectSeatRequestDto.getPerformanceSeatId(), performanceSeat.getReservationStatus());
-		if (!result) {
-			throw new SeatReservationInProgressException();
+		if (requestSeatIds.size() != performanceSeats.size()) {
+			throw new PerformanceSeatNotFoundException();
 		}
-		return new SelectSeatResponseDto(selectSeatRequestDto.getPerformanceSeatId());
+
+		performanceSeatUtil.tryLockSeat(userId, performanceSeats);
+		return new SelectSeatResponseDto(selectSeatsRequestDto.getPerformanceSeatIds());
 	}
 
-	public PerformanceSeatSummaryResponseDto getSummary(Long userId, Long performanceSeatId) {
-		Long selector = performanceSeatUtil.getSeatSelector(performanceSeatId);
-		if (userId != selector) {
-			throw new InvalidUserInfoException();
+	public PerformanceSeatSummaryResponseDto getSummary(Long userId) {
+		List<Long> performanceSeatIds = performanceSeatUtil.getSelectedSeats(userId);
+
+		List<PerformanceSeat> performanceSeats = performanceSeatRepository.findByIdsWithAll(performanceSeatIds);
+		if (performanceSeatIds.size() != performanceSeats.size()) {
+			throw new PerformanceSeatNotFoundException();
 		}
 
-		PerformanceSeat performanceSeat = performanceSeatRepository.findByPerformanceSeatWithAll(performanceSeatId)
-			.orElseThrow(PerformanceSeatNotFoundException::new);
+		List<SelectedSeatDto> selectedSeats = performanceSeats.stream()
+			.map(PerformanceSeat -> SelectedSeatDto.of(PerformanceSeat.getId(), PerformanceSeat.getSeat(),
+				PerformanceSeat.getPerformancePrice()))
+			.toList();
 
-		return PerformanceSeatSummaryResponseDto.of(
-			performanceSeatId,
-			performanceSeat.getPerformance(),
-			performanceSeat.getSchedule(),
-			performanceSeat.getSeat(),
-			performanceSeat.getPerformancePrice()
+		BigDecimal totalPrice = selectedSeats.stream()
+			.map(SelectedSeatDto::getPrice)
+			.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return new PerformanceSeatSummaryResponseDto(
+			performanceSeats.get(0).getPerformance().getTitle(),
+			performanceSeats.get(0).getSchedule().getDate(),
+			performanceSeats.get(0).getSchedule().getTime(),
+			selectedSeats,
+			totalPrice
 		);
 	}
 }

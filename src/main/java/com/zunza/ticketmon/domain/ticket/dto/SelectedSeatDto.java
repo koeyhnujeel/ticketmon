@@ -11,12 +11,17 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SeatSummary {
+public class SelectedSeatDto {
+	private Long id;
 	private String seatNumber;
 	private SeatGrade seatGrade;
 	private BigDecimal price;
 
-	public static SeatSummary of(Seat seat, PerformancePrice performancePrice) {
-		return new SeatSummary(seat.getSeatNumber(), performancePrice.getSeatGrade(), performancePrice.getPrice());
+	public static SelectedSeatDto of(Long performanceSeatId, Seat seat, PerformancePrice performancePrice) {
+		return new SelectedSeatDto(
+			performanceSeatId,
+			seat.getSeatNumber(),
+			performancePrice.getSeatGrade(),
+			performancePrice.getPrice());
 	}
 }

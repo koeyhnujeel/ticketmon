@@ -1,10 +1,12 @@
 package com.zunza.ticketmon.domain.ticket.dto;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class SelectSeatRequestDto {
-	private Long performanceSeatId;
+public class SelectSeatsRequestDto {
+	private List<Long> performanceSeatIds;
 }

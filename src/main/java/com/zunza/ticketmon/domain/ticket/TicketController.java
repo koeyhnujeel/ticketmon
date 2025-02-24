@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zunza.ticketmon.domain.ticket.dto.PerformanceSeatResponseDto;
 import com.zunza.ticketmon.domain.ticket.dto.PerformanceSeatSummaryResponseDto;
-import com.zunza.ticketmon.domain.ticket.dto.SelectSeatRequestDto;
+import com.zunza.ticketmon.domain.ticket.dto.SelectSeatsRequestDto;
 import com.zunza.ticketmon.domain.ticket.dto.SelectSeatResponseDto;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -32,14 +31,12 @@ public class TicketController {
 	@PostMapping("/api/seats/lock")
 	public ResponseEntity<SelectSeatResponseDto> selectSeat(
 		@AuthenticationPrincipal Long userId,
-		@RequestBody SelectSeatRequestDto selectSeatRequestDto) {
-		return ResponseEntity.ok(ticketService.selectSeat(userId, selectSeatRequestDto));
+		@RequestBody SelectSeatsRequestDto selectSeatsRequestDto) {
+		return ResponseEntity.ok(ticketService.selectSeat(userId, selectSeatsRequestDto));
 	}
 
-	@GetMapping("/api/seats/{performanceSeatId}/summary")
-	public ResponseEntity<PerformanceSeatSummaryResponseDto> getSummary(
-		@AuthenticationPrincipal Long userId,
-		@PathVariable Long performanceSeatId) {
-		return ResponseEntity.ok(ticketService.getSummary(userId, performanceSeatId));
+	@GetMapping("/api/seats/summary")
+	public ResponseEntity<PerformanceSeatSummaryResponseDto> getSummary(@AuthenticationPrincipal Long userId) {
+		return ResponseEntity.ok(ticketService.getSummary(userId));
 	}
 }
