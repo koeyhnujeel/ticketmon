@@ -14,9 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zunza.ticketmon.global.security.JwtAuthenticationEntryPoint;
-import com.zunza.ticketmon.global.security.JwtAuthenticationFilter;
-import com.zunza.ticketmon.global.security.JwtExceptionFilter;
+import com.zunza.ticketmon.oauth2.CustomOAuth2SuccessHandler;
+import com.zunza.ticketmon.oauth2.CustomOauth2UserService;
 import com.zunza.ticketmon.global.security.JwtLoginFilter;
 import com.zunza.ticketmon.global.security.JwtTokenProvider;
 import com.zunza.ticketmon.global.security.RefreshTokenRepository;
@@ -28,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+	private final CustomOauth2UserService customOauth2UserService;
+	private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 	private final AuthenticationConfiguration authenticationConfiguration;
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final JwtTokenProvider jwtTokenProvider;
@@ -47,27 +48,30 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+			.oauth2Login(oauth2 -> oauth2
+				.userInfoEndpoint(userInfoEndpointConfig ->
+					userInfoEndpointConfig.userService(customOauth2UserService))
+				.successHandler(customOAuth2SuccessHandler))
+
 			.authorizeHttpRequests(authorize -> authorize
-				.requestMatchers("/api/auth/test").authenticated()
-				.anyRequest().permitAll()
-			)
+				.anyRequest().permitAll())
 
 			.addFilterBefore(new JwtLoginFilter(
 					authenticationConfiguration.getAuthenticationManager(),
 					refreshTokenRepository,
 					jwtTokenProvider,
 					objectMapper),
-				UsernamePasswordAuthenticationFilter.class)
+				UsernamePasswordAuthenticationFilter.class);
 
-			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-				UsernamePasswordAuthenticationFilter.class)
+			// .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+			// 	UsernamePasswordAuthenticationFilter.class)
+			//
+			// .addFilterBefore(new JwtExceptionFilter(objectMapper),
+			// 	JwtAuthenticationFilter.class)
 
-			.addFilterBefore(new JwtExceptionFilter(objectMapper),
-				JwtAuthenticationFilter.class)
-
-			.exceptionHandling(exceptionHandling -> exceptionHandling
-				.authenticationEntryPoint(new JwtAuthenticationEntryPoint(objectMapper))
-			);
+			// .exceptionHandling(exceptionHandling -> exceptionHandling
+			// 	.authenticationEntryPoint(new JwtAuthenticationEntryPoint(objectMapper))
+			// );
 
 		return http.build();
 	}

@@ -30,7 +30,7 @@ public class AuthService {
 		}
 
 		signupRequestDto.setEncodedPassword(passwordEncoder.encode(signupRequestDto.getPassword()));
-		userRepository.save(User.from(signupRequestDto));
+		userRepository.save(User.createNormalUser(signupRequestDto));
 	}
 
 	public TokenResponseDto refresh(TokenRequestDto tokenRequestDto) {
