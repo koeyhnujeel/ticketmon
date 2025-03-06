@@ -26,7 +26,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		Long userId = oauth2User.getUserId();
 
 		String accessToken = jwtTokenProvider.generateAccessToken(userId);
-		String redirectUrl = "http://localhost:5173?token=" + accessToken;
+		String redirectUrl = "http://localhost:5173/login?token=" + accessToken;
 		response.sendRedirect(redirectUrl);
 	}
 }
