@@ -10,6 +10,7 @@ import com.zunza.ticketmon.domain.user.User;
 import com.zunza.ticketmon.domain.user.UserRepository;
 import com.zunza.ticketmon.domain.user.UserType;
 import com.zunza.ticketmon.oauth2.dto.GoogleResponseDto;
+import com.zunza.ticketmon.oauth2.dto.KakaoResponseDto;
 import com.zunza.ticketmon.oauth2.dto.NaverResponseDto;
 import com.zunza.ticketmon.oauth2.dto.Oauth2Response;
 import com.zunza.ticketmon.oauth2.dto.Oauth2UserDto;
@@ -35,6 +36,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 		switch (registrationId) {
 			case "google" -> oauth2Response = new GoogleResponseDto(oauth2User.getAttributes());
 			case "naver" -> oauth2Response = new NaverResponseDto(oauth2User.getAttributes());
+			case "kakao" -> oauth2Response = new KakaoResponseDto(oauth2User.getAttributes());
 		}
 
 		User user = userRepository.findByEmailForOauth2(oauth2Response.getEmail());
