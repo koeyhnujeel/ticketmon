@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zunza.ticketmon.domain.ticket.dto.PerformanceSeatResponseDto;
@@ -30,13 +31,13 @@ public class TicketController {
 
 	@PostMapping("/api/seats/lock")
 	public ResponseEntity<SelectSeatResponseDto> selectSeat(
-		@AuthenticationPrincipal Long userId,
+		@RequestHeader("X-User-Id") Long userId,
 		@RequestBody SelectSeatsRequestDto selectSeatsRequestDto) {
 		return ResponseEntity.ok(ticketService.selectSeat(userId, selectSeatsRequestDto));
 	}
 
 	@GetMapping("/api/seats/summary")
-	public ResponseEntity<PerformanceSeatSummaryResponseDto> getSummary(@AuthenticationPrincipal Long userId) {
+	public ResponseEntity<PerformanceSeatSummaryResponseDto> getSummary(@RequestHeader("X-User-Id") Long userId) {
 		return ResponseEntity.ok(ticketService.getSummary(userId));
 	}
 }
