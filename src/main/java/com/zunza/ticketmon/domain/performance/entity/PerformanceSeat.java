@@ -22,10 +22,6 @@ import lombok.NoArgsConstructor;
 public class PerformanceSeat extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "performance_id")
-	private Performance performance;
-
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "seat_id")
 	private Seat seat;
 
@@ -45,8 +41,7 @@ public class PerformanceSeat extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private ReservationStatus reservationStatus = ReservationStatus.AVAILABLE;
 
-	public PerformanceSeat(Performance performance, Seat seat, PerformancePrice performancePrice, Schedule schedule) {
-		this.performance = performance;
+	public PerformanceSeat(Seat seat, PerformancePrice performancePrice, Schedule schedule) {
 		this.seat = seat;
 		this.performancePrice = performancePrice;
 		this.schedule = schedule;
