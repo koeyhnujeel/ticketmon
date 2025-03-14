@@ -18,6 +18,7 @@ import com.zunza.ticketmon.domain.payment.exception.CardBalanceException;
 import com.zunza.ticketmon.domain.payment.exception.CardInfoException;
 import com.zunza.ticketmon.domain.payment.exception.CardLimitException;
 import com.zunza.ticketmon.domain.payment.exception.NetworkException;
+import com.zunza.ticketmon.domain.payment.exception.PaymentTimeoutException;
 import com.zunza.ticketmon.domain.performance.entity.PerformanceSeat;
 import com.zunza.ticketmon.domain.performance.exception.PerformanceSeatNotFoundException;
 import com.zunza.ticketmon.domain.performance.repository.PerformanceSeatRepository;
@@ -70,7 +71,7 @@ public class PaymentService {
 			.filter(performanceSeatUtil::isExpired)
 			.findAny()
 			.ifPresent(id -> {
-				throw new IllegalArgumentException("시간 초과");
+				throw new PaymentTimeoutException();
 			});
 
 		List<Long> selectedSeats = performanceSeatUtil.getSelectedSeats(userId);
@@ -80,6 +81,10 @@ public class PaymentService {
 
 		PaymentResult value = getPaymentResult();
 		return switch (value) {
+			case NETWORK_ERROR -> throw new NetworkException();
+			case CARD_INFO_ERROR -> throw new CardInfoException();
+			case CARD_BALANCE_ERROR -> throw new CardBalanceException();
+			case CARD_LIMIT_ERROR -> throw new CardLimitException();
 			case SUCCESS -> {
 				User user = userRepository.findById(userId)
 					.orElseThrow(UserNotFoundException::new);
@@ -99,11 +104,6 @@ public class PaymentService {
 
 				yield new PaymentResponseDto(paymentRequestDto.getTotalPrice(), LocalDateTime.now());
 			}
-
-			case NETWORK_ERROR -> throw new NetworkException();
-			case CARD_INFO_ERROR -> throw new CardInfoException();
-			case CARD_BALANCE_ERROR -> throw new CardBalanceException();
-			case CARD_LIMIT_ERROR -> throw new CardLimitException();
 		};
 	}
 
