@@ -28,32 +28,35 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 		OAuth2User oauth2User = super.loadUser(userRequest);
-		log.info(oauth2User.toString());
-
 		String registrationId = userRequest.getClientRegistration().getRegistrationId();
-		Oauth2Response oauth2Response = null;
+		Oauth2Response oauth2Response = getOauth2Response(oauth2User, registrationId);
 
-		switch (registrationId) {
-			case "google" -> oauth2Response = new GoogleResponseDto(oauth2User.getAttributes());
-			case "naver" -> oauth2Response = new NaverResponseDto(oauth2User.getAttributes());
-			case "kakao" -> oauth2Response = new KakaoResponseDto(oauth2User.getAttributes());
-		}
+		return userRepository.findByEmail(oauth2Response.getEmail())
+			.map(user -> {
+				if (user.getUserType() != UserType.SOCIAL) {
+					throw new IllegalArgumentException();
+				}
 
-		User user = userRepository.findByEmailForOauth2(oauth2Response.getEmail());
+				return createCustomOauth2User(user, oauth2Response);
+			})
+			.orElseGet(() -> {
+				User socialUser = User.createSocialUser(oauth2Response);
+				User saved = userRepository.save(socialUser);
+				return createCustomOauth2User(saved, oauth2Response);
+			});
+	}
 
-		if (user != null) {
-			if (user.getUserType() == UserType.SOCIAL) {
-				Oauth2UserDto oauth2UserDto = new Oauth2UserDto(user.getId(), oauth2Response.getName(),
-					oauth2Response.getEmail());
-				return new CustomOauth2User(oauth2UserDto);
-			} else {
-				throw new IllegalArgumentException();
-			}
-		} else {
-			User socialUser = User.createSocialUser(oauth2Response);
-			User saved = userRepository.save(socialUser);
-			Oauth2UserDto oauth2UserDto = new Oauth2UserDto(saved.getId(), oauth2Response.getName(), oauth2Response.getEmail());
-			return new CustomOauth2User(oauth2UserDto);
-		}
+	private Oauth2Response getOauth2Response(OAuth2User oAuth2User, String registrationId) {
+		return switch (registrationId) {
+			case "google" -> new GoogleResponseDto(oAuth2User.getAttributes());
+			case "naver" -> new NaverResponseDto(oAuth2User.getAttributes());
+			case "kakao" -> new KakaoResponseDto(oAuth2User.getAttributes());
+			default -> throw new IllegalArgumentException("지원하지 않는 Provider 입니다.");
+		};
+	}
+
+	private CustomOauth2User createCustomOauth2User(User user, Oauth2Response oauth2Response) {
+		Oauth2UserDto oauth2UserDto = new Oauth2UserDto(user.getId(), oauth2Response.getName(), oauth2Response.getEmail());
+		return new CustomOauth2User(oauth2UserDto);
 	}
 }
