@@ -9,4 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SelectSeatsRequestDto {
 	private List<Long> performanceSeatIds;
+
+	public void setPerformanceSeatIds(List<Long> longs) {
+		this.performanceSeatIds = longs;
+	}
 }
