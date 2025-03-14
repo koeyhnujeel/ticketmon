@@ -39,23 +39,24 @@ public class DataInit implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		Venue venue = venueRepository.save(Venue.of("Main", 10, 50));
+		Venue venue = venueRepository.save(Venue.of("블루스퀘어", 10, 50));
 		for (int i = 1; i <= venue.getSeatRows(); i++) {
 			for (int j = 1; j <= venue.getSeatColumns(); j++) {
 				seatRepository.save(Seat.of(i, j, venue));
 			}
 		}
 
+		String[] titles = new String[] {"지킬 앤 하이드", "웃는 남자", "베르테르", "알라딘", "원스"};
 		long interval = 0;
 		for (int i = 1; i <= 5; i++) {
 			LocalDate startDate = LocalDate.now().plusDays(interval);
 			LocalDate endDate = startDate.plusDays(3);
 			Performance performance = performanceRepository.save(
-				Performance.of("title" + i, "description" + i, venue, Category.CONCERT, startDate, endDate));
+				Performance.of(titles[i - 1], "description" + i, venue, Category.CONCERT, startDate, endDate));
 			List<PerformancePrice> performancePrices = createPerformancePrice(performance);
 			List<Schedule> schedules = createSchedule(performance, startDate);
 			List<Seat> seats = seatRepository.findByOrderBySeatRowNumberAscSeatColumnNumberAsc();
-			createPerformanceSeat(performance, performancePrices, schedules, seats);
+			createPerformanceSeat(performancePrices, schedules, seats);
 			interval += 4;
 		}
 	}
@@ -93,17 +94,16 @@ public class DataInit implements CommandLineRunner {
 	}
 
 	public void createPerformanceSeat(
-		Performance performance,
 		List<PerformancePrice> performancePrices,
 		List<Schedule> schedules,
 		List<Seat> seats) {
 
 		for (Schedule schedule : schedules) {
 			for (Seat seat : seats) {
-				if (seat.getSeatRowNumber() >= 9) performanceSeatRepository.save(new PerformanceSeat(performance, seat, performancePrices.get(3), schedule));
-				else if (seat.getSeatRowNumber() >= 7) performanceSeatRepository.save(new PerformanceSeat(performance, seat, performancePrices.get(2), schedule));
-				else if (seat.getSeatRowNumber() >= 5) performanceSeatRepository.save(new PerformanceSeat(performance, seat, performancePrices.get(1), schedule));
-				else performanceSeatRepository.save(new PerformanceSeat(performance, seat, performancePrices.get(0), schedule));
+				if (seat.getSeatRowNumber() >= 9) performanceSeatRepository.save(new PerformanceSeat(seat, performancePrices.get(3), schedule));
+				else if (seat.getSeatRowNumber() >= 7) performanceSeatRepository.save(new PerformanceSeat(seat, performancePrices.get(2), schedule));
+				else if (seat.getSeatRowNumber() >= 5) performanceSeatRepository.save(new PerformanceSeat(seat, performancePrices.get(1), schedule));
+				else performanceSeatRepository.save(new PerformanceSeat(seat, performancePrices.get(0), schedule));
 			}
 		}
 	}

@@ -21,10 +21,10 @@ public interface PerformanceSeatRepository extends JpaRepository<PerformanceSeat
 
 	@Query("SELECT DISTINCT ps "
 		+ "FROM PerformanceSeat ps "
-		+ "JOIN FETCH ps.performance p "
 		+ "JOIN FETCH ps.seat s "
 		+ "JOIN FETCH ps.performancePrice pp "
 		+ "JOIN FETCH ps.schedule sd "
+		+ "JOIN FETCH sd.performance p "
 		+ "WHERE ps.id IN :performanceSeatIds")
 	List<PerformanceSeat> findByIdsWithAll(@Param("performanceSeatIds") List<Long> performanceSeatIds);
 

@@ -73,7 +73,7 @@ public class TicketService {
 			.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 		return new PerformanceSeatSummaryResponseDto(
-			performanceSeats.get(0).getPerformance().getTitle(),
+			performanceSeats.get(0).getSchedule().getPerformance().getTitle(),
 			performanceSeats.get(0).getSchedule().getDate(),
 			performanceSeats.get(0).getSchedule().getTime(),
 			selectedSeats,
