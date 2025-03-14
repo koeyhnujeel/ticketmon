@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zunza.ticketmon.domain.user.dto.SignupRequestDto;
 import com.zunza.ticketmon.domain.user.dto.TokenRequestDto;
-import com.zunza.ticketmon.global.security.TokenResponseDto;
+import com.zunza.ticketmon.global.security.TokenRefreshResponseDto;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<TokenResponseDto> tokenRefresh(@RequestBody TokenRequestDto tokenRequestDto) {
+	public ResponseEntity<TokenRefreshResponseDto> tokenRefresh(@RequestBody TokenRequestDto tokenRequestDto) {
 		return ResponseEntity.ok(authService.refresh(tokenRequestDto));
 	}
 
