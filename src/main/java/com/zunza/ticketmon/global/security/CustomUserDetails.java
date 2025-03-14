@@ -15,13 +15,13 @@ import lombok.Getter;
 public class CustomUserDetails implements UserDetails {
 
 	private final Long userId;
-	private final String email;
+	private final String username;
 	private final String password;
 	private final List<GrantedAuthority> authorities;
 
 	public CustomUserDetails(User user) {
 		this.userId = user.getId();
-		this.email = user.getEmail();
+		this.username = user.getName();
 		this.password = user.getPassword();
 		this.authorities = List.of(new SimpleGrantedAuthority("USER"));
 	}
@@ -33,7 +33,7 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public String getUsername() {
-		return email;
+		return username;
 	}
 
 	@Override

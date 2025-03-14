@@ -67,9 +67,9 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		String refreshToken = jwtTokenProvider.generateRefreshToken();
 		refreshTokenRepository.saveRefreshToken(userId, refreshToken);
 
-		TokenResponseDto tokenResponseDto = new TokenResponseDto(accessToken, refreshToken);
-		ApiResponse<TokenResponseDto> apiResponse = ApiResponse.<TokenResponseDto>builder()
-			.data(tokenResponseDto)
+		LoginSuccessResponseDto loginSuccessResponseDto = new LoginSuccessResponseDto(details.getUsername(), accessToken, refreshToken);
+		ApiResponse<LoginSuccessResponseDto> apiResponse = ApiResponse.<LoginSuccessResponseDto>builder()
+			.data(loginSuccessResponseDto)
 			.code(HttpServletResponse.SC_OK)
 			.build();
 
