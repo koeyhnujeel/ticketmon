@@ -11,7 +11,7 @@ import com.zunza.ticketmon.domain.user.exception.DuplicateEmailException;
 import com.zunza.ticketmon.global.exception.InvalidRefreshTokenException;
 import com.zunza.ticketmon.global.security.JwtTokenProvider;
 import com.zunza.ticketmon.global.security.RefreshTokenRepository;
-import com.zunza.ticketmon.global.security.TokenResponseDto;
+import com.zunza.ticketmon.global.security.TokenRefreshResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +33,7 @@ public class AuthService {
 		userRepository.save(User.createNormalUser(signupRequestDto));
 	}
 
-	public TokenResponseDto refresh(TokenRequestDto tokenRequestDto) {
+	public TokenRefreshResponseDto refresh(TokenRequestDto tokenRequestDto) {
 		Map<String, Object> payload = jwtTokenProvider.getPayloadFromExpiredToken(tokenRequestDto.getAccessToken());
 		Integer userId = (Integer)payload.get("userId");
 
@@ -49,6 +49,6 @@ public class AuthService {
 		String newRefreshToken = jwtTokenProvider.generateRefreshToken();
 		tokenRepository.saveRefreshToken(userId.longValue(), newRefreshToken);
 
-		return new TokenResponseDto(newAccessToken, newRefreshToken);
+		return new TokenRefreshResponseDto(newAccessToken, newRefreshToken);
 	}
 }
